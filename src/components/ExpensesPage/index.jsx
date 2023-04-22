@@ -2,7 +2,8 @@ import { useState } from "react";
 import Expense from 'components/Expense';
 import Form from "components/Form";
 import Diagram from "components/Diagram";
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
+import FilterExpenses from "components/FilterExpenses";
 
 const ExpensesPage = () => {
 
@@ -30,14 +31,15 @@ const ExpensesPage = () => {
     const deleteCosts = (id) => {
         const filteredCosts = expenses.filter(expense => expense.id !== id) //логика от обратного - покажем массив без того продукта, который удалили
         setExpenses(filteredCosts) //обновляем наше состояние - передаем наш отфильтрованный массив. setExpenses и придуман именно для того, чтобы мы в него могли передавать переделанный массив
-     }
-    
-    const categories = ['Еда', 'Связь', 'Транспорт', 'Красота', 'Образование', 'Коммунальные платежи', 'Ипотека', 'Прочие расходы']
-
-    const addExpense = (expense) => { // передаем эту функцию в тег формы как свойство
-        setExpenses([expense, ...expenses]) //копируем всё текущее в новый массив и добавляем еще один элемент массива
     }
 
+    const addExpense = (expense) => { 
+        setExpenses([expense, ...expenses]) 
+        setFiltered([expense, ...expenses])
+    }
+    
+    const categories = ['Еда', 'Связь', 'Транспорт', 'Красота', 'Образование', 'Коммунальные платежи', 'Ипотека', 'Прочие расходы']
+  
     const data = [
         { name: "Еда", cost: expenses.filter(expense => expense.category === "Еда").reduce((acc, expense) => acc + Number(expense.cost), 0 ) },
         { name: "Связь", cost: expenses.filter(expense => expense.category === "Связь").reduce((acc, expense) => acc + Number(expense.cost), 0 ) },
@@ -49,6 +51,19 @@ const ExpensesPage = () => {
         { name: "Прочие расходы", cost: expenses.filter(expense => expense.category === "Прочие расходы").reduce((acc, expense) => acc + Number(expense.cost), 0 ) },
         ]
 
+    const [filtered, setFiltered] = useState(expenses) 
+
+    const filterCategory = (category) => {
+        if (category === "Все расходы") {
+            setFiltered(expenses)
+        } else {
+            let newExpenses = [...expenses].filter(expense => expense.category === category)
+            setFiltered(newExpenses)
+        }
+        
+        return filtered
+    }
+
     return (
         <div className="bg-slate-100">
 
@@ -59,14 +74,14 @@ const ExpensesPage = () => {
 
                 <div className="flex"> 
 
-                    <div className="flex ">
+                    <div className="flex">
                         <Diagram data={data} />
                     </div>
                             
-                    <div className="flex flex-col">
+                    <div className="flex flex-col mt-10">
 
                         {categories.map(category => (
-                            <div>
+                            <div className="flex space-x-3.5">
                                 <p className="text-lg text-slate-500 ">{category}</p>
                                 <p className="text-lg text-slate-500 font-bold"> {new Intl.NumberFormat('ru-RU').format(expenses.filter(expense => expense.category === category).reduce((acc, expense) => acc + Number(expense.cost), 0 ))} руб.</p>
                             </div>
@@ -74,9 +89,7 @@ const ExpensesPage = () => {
                         ))}
                     </div>
                 </div>   
-                
-                <Form addExpense={addExpense}/>
-                
+
                 <div> 
                     <div className="text-stone-600 text-lg md:text-xl">
                         <div className="bg-slate-200 text-amber-400 font-semibold rounded px-6 py-2 mb-12 flex justify-between mx-12">
@@ -84,12 +97,16 @@ const ExpensesPage = () => {
                         </div>
                     </div>
                 </div>
+                
+                <Form addExpense={addExpense}/>                
+
+                <FilterExpenses filterCategory={filterCategory} />
 
                 {expenses.length === 0 && ( 
                 <div className="mt-20 text-center text-3xl text-slate-500 font-bold">У вас пока нет расходов<br/><span className="mt-10 text-center text-base text-slate-500 font-normal">Заполните форму для добавления расходов</span></div>
                 )}
 
-                {expenses.length > 0 && expenses.reverse().map((expense) => {
+                {filtered.length > 0 && filtered.reverse().map((expense) => {
                     return (
                         <Expense key={expense.id} expense={expense} deleteCosts={deleteCosts} />
                     )

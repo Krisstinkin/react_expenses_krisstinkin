@@ -12,8 +12,7 @@ const Expense = ( { expense, deleteCosts } ) => {
                 <div className="text-slate-500 font-semibold text-lg"> - {new Intl.NumberFormat('ru-RU').format(expense.cost)} руб</div>
                 <a className="hover:text-amber-400 cursor-pointer bg-slate-200 text-slate-500 font-semibold rounded px-6 py-2 mb-1" onClick={() => deleteCosts(expense.id)}>Удалить</a>
             </div>
-        </div>
-           
+        </div>   
     )
 }
 
